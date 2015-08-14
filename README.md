@@ -1,4 +1,4 @@
-This is a library for the forthcoming Logos Electromechanical 8x8 Driver. It is based opn the library for the Adafruit 16-channel PWM & Servo driver.
+This is a library for the forthcoming Logos Electromechanical 8x8 Driver. It is based on the library for the Adafruit 16-channel PWM & Servo driver.
 
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products/815
