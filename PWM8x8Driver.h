@@ -73,9 +73,9 @@ class PWM8x8Driver {
 
 class PWM8x8DCMotorDriver {
 	public:
-		PWM8x8Driver(PWM8x8Driver * board);
+		PWM8x8DCMotorDriver(PWM8x8Driver * board);
 		void 		setPins(uint8_t high1, uint8_t low1, uint8_t high2, uint8_t low2);
-		void 		setPins(uint8_t[2][2] pins);
+		void 		setPins(uint8_t pins[2][2]);
 		void 		getPins(uint8_t *high1, uint8_t *low1, uint8_t *high2, uint8_t *low2);
 		void 		setDirection(uint8_t direction);
 		uint8_t		getDirection(void);
@@ -86,9 +86,9 @@ class PWM8x8DCMotorDriver {
 		void 		brake(bool state);
 	private:
 		PWM8x8Driver 	*_board;
-		uint8_t 		_pins[2][2];
-		uint8_t			_dir;
-		uint16_t		_speed;
+		uint8_t 		_pins[2][2] = {{0, 0}, {0, 0}};
+		uint8_t			_dir = DIR_FWD;
+		uint16_t		_speed = 0;
 		
 		void 			_writeMotor(void);
 };
@@ -97,7 +97,7 @@ class PWM8x8StepperMotorDriver {
 	public:
 		PWM8x8StepperMotorDriver(PWM8x8Driver * board, uint8_t mode = STEP_MODE_FULL);
 		void 		setPins(uint8_t A1_hi, uint8_t A1_lo, uint8_t A0_hi, uint8_t A0_lo, uint8_t B1_hi, uint8_t B1_lo, uint8_t B0_hi, uint8_t B0_lo);
-		void 		setPins(uint8_t[STEP_NUM_PHASES][2] pins);
+		void 		setPins(uint8_t pins[STEP_NUM_PHASES][2]);
 		void 		getPins(uint8_t *A1_hi, uint8_t *A1_lo, uint8_t *A0_hi, uint8_t *A0_lo, uint8_t *B1_hi, uint8_t *B1_lo, uint8_t *B0_hi, uint8_t *B0_lo);
 		uint16_t	getStepIndex(void);
 		void		setDir(uint8_t dir);
@@ -110,15 +110,15 @@ class PWM8x8StepperMotorDriver {
 		uint16_t	getCurrent(void);
 	private:
 		PWM8x8Driver 	*_board;
-		uint8_t 		_pins[STEP_NUM_PHASES][2];
-		uint8_t			_dir;
+		uint8_t 		_pins[STEP_NUM_PHASES][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+		uint8_t			_dir = DIR_FWD;
 		uint8_t 		_mode;
-		int8_t 			_stepIndex;
-		uint16_t 		_current;
-		bool			_phaseState[STEP_NUM_PHASES];
+		int8_t 			_stepIndex = STEP_TABLE_SIZE;
+		uint16_t 		_current = PCA9685_MAX_VAL;
+		bool			_phaseState[STEP_NUM_PHASES] = {0, 0, 0, 0};
 		bool			_stepTable[STEP_TABLE_SIZE][STEP_NUM_PHASES];
 		
 		void		_setPhase(uint8_t phase, bool state);
-}
+};
 
 #endif
