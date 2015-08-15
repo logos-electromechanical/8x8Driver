@@ -16,8 +16,8 @@
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 
-#ifndef _ADAFRUIT_PWMServoDriver_H
-#define _ADAFRUIT_PWMServoDriver_H
+#ifndef _LOGOS_PWM8x8Driver_H
+#define _LOGOS_PWM8x8Driver_H
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -26,23 +26,35 @@
 #endif
 
 
-#define PCA9685_SUBADR1 0x2
-#define PCA9685_SUBADR2 0x3
-#define PCA9685_SUBADR3 0x4
+#define PCA9685_SUBADR1 	0x2
+#define PCA9685_SUBADR2 	0x3
+#define PCA9685_SUBADR3 	0x4
 
-#define PCA9685_MODE1 0x0
-#define PCA9685_PRESCALE 0xFE
+#define PCA9685_MODE1 		0x0
+#define PCA9685_PRESCALE 	0xFE
 
-#define LED0_ON_L 0x6
-#define LED0_ON_H 0x7
-#define LED0_OFF_L 0x8
-#define LED0_OFF_H 0x9
+#define LED0_ON_L 			0x6
+#define LED0_ON_H 			0x7
+#define LED0_OFF_L 			0x8
+#define LED0_OFF_H 			0x9
 
-#define ALLLED_ON_L 0xFA
-#define ALLLED_ON_H 0xFB
-#define ALLLED_OFF_L 0xFC
-#define ALLLED_OFF_H 0xFD
+#define ALLLED_ON_L 		0xFA
+#define ALLLED_ON_H 		0xFB
+#define ALLLED_OFF_L 		0xFC
+#define ALLLED_OFF_H 		0xFD
 
+#define DIR_FWD				1
+#define DIR_REV 			0
+
+#define PCA9685_MAX_VAL		4095
+#define PCA9685_FULL_ON		4096
+#define PCA9685_FULL_OFF	0
+
+#define STEP_MODE_FULL		0
+#define STEP_MODE_HALF		1
+
+#define STEP_TABLE_SIZE		8
+#define STEP_NUM_PHASES		4
 
 class PWM8x8Driver {
 	public:
@@ -63,28 +75,30 @@ class PWM8x8DCMotorDriver {
 	public:
 		PWM8x8Driver(PWM8x8Driver * board);
 		void 		setPins(uint8_t high1, uint8_t low1, uint8_t high2, uint8_t low2);
+		void 		setPins(uint8_t[2][2] pins);
 		void 		getPins(uint8_t *high1, uint8_t *low1, uint8_t *high2, uint8_t *low2);
-		void 		begin(void);
 		void 		setDirection(uint8_t direction);
 		uint8_t		getDirection(void);
 		void 		setSpeed(uint16_t speed);
 		uint16_t	getSpeed(void);
-		void 		brake(void);
+		void 		setVelocity(int16_t velocity);
+		int16_t		getVelocity(void);
+		void 		brake(bool state);
 	private:
 		PWM8x8Driver 	*_board;
-		uint8_t 		_high1;
-		uint8_t 		_low1;
-		uint8_t 		_high2;
-		uint8_t 		_low2;
+		uint8_t 		_pins[2][2];
 		uint8_t			_dir;
 		uint16_t		_speed;
+		
+		void 			_writeMotor(void);
 };
 
 class PWM8x8StepperMotorDriver {
 	public:
-		PWM8x8StepperMotorDriver(PWM8x8Driver * board);
+		PWM8x8StepperMotorDriver(PWM8x8Driver * board, uint8_t mode = STEP_MODE_FULL);
 		void 		setPins(uint8_t A1_hi, uint8_t A1_lo, uint8_t A0_hi, uint8_t A0_lo, uint8_t B1_hi, uint8_t B1_lo, uint8_t B0_hi, uint8_t B0_lo);
-		void 		getPins(uint8_t A1_hi, uint8_t A1_lo, uint8_t A0_hi, uint8_t A0_lo, uint8_t B1_hi, uint8_t B1_lo, uint8_t B0_hi, uint8_t B0_lo);
+		void 		setPins(uint8_t[STEP_NUM_PHASES][2] pins);
+		void 		getPins(uint8_t *A1_hi, uint8_t *A1_lo, uint8_t *A0_hi, uint8_t *A0_lo, uint8_t *B1_hi, uint8_t *B1_lo, uint8_t *B0_hi, uint8_t *B0_lo);
 		uint16_t	getStepIndex(void);
 		void		setDir(uint8_t dir);
 		uint8_t 	getDir(void);
@@ -92,20 +106,19 @@ class PWM8x8StepperMotorDriver {
 		uint8_t		getMode(void);
 		void 		step(void);
 		void 		step(uint8_t dir);
+		void 		setCurrent(uint16_t current);
+		uint16_t	getCurrent(void);
 	private:
 		PWM8x8Driver 	*_board;
-		uint8_t 		_A1_hi;
-		uint8_t 		_A1_lo;
-		uint8_t 		_A0_hi;
-		uint8_t 		_A0_lo;
-		uint8_t 		_B1_hi;
-		uint8_t 		_B1_lo;
-		uint8_t 		_B0_hi;
-		uint8_t 		_B0_lo;
+		uint8_t 		_pins[STEP_NUM_PHASES][2];
 		uint8_t			_dir;
 		uint8_t 		_mode;
-		uint16_t 		_stepIndex;
-
+		int8_t 			_stepIndex;
+		uint16_t 		_current;
+		bool			_phaseState[STEP_NUM_PHASES];
+		bool			_stepTable[STEP_TABLE_SIZE][STEP_NUM_PHASES];
+		
+		void		_setPhase(uint8_t phase, bool state);
 }
 
 #endif
